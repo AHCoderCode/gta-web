@@ -305,13 +305,15 @@ export class Game {
   }
 
   private save(): void {
+    const savedPlayerPosition = this.inVehicle ? this.vehicle.group.position : this.player.position;
+    const savedPlayerYaw = this.inVehicle ? this.vehicle.yaw : this.player.yaw;
     const data: GameSave = {
       version: 1,
       savedAt: Date.now(),
       player: {
-        x: this.player.position.x,
-        z: this.player.position.z,
-        yaw: this.player.yaw,
+        x: savedPlayerPosition.x,
+        z: savedPlayerPosition.z,
+        yaw: savedPlayerYaw,
         stamina: this.player.stamina
       },
       vehicle: {

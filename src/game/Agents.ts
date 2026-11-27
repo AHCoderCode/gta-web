@@ -21,7 +21,7 @@ export class WorldActors {
   private readonly walkers: Walker[] = [];
   private readonly traffic: TrafficCar[] = [];
 
-  constructor(private readonly scene: THREE.Scene, private density = 1) {
+  constructor(private readonly scene: THREE.Scene) {
     this.createWalkers();
     this.createTraffic();
   }

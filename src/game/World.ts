@@ -99,15 +99,29 @@ export class World {
 
     // Dashed lane markings are limited to a few short sections to keep draw calls low.
     const dashGeometry = new THREE.PlaneGeometry(0.16, 2.4);
+    const horizontalDashGeometry = new THREE.PlaneGeometry(2.4, 0.16);
     const dashMaterial = new THREE.MeshBasicMaterial({ color: 0xc8c0aa });
+    const dashCount = ROAD_CENTERS.length * 27;
+    const verticalDashes = new THREE.InstancedMesh(dashGeometry, dashMaterial, dashCount);
+    const horizontalDashes = new THREE.InstancedMesh(horizontalDashGeometry, dashMaterial, dashCount);
+    const dashTransform = new THREE.Object3D();
+    let verticalIndex = 0;
+    let horizontalIndex = 0;
     for (const road of ROAD_CENTERS) {
-      for (let z = -156; z <= 156; z += 12) {
-        const dash = new THREE.Mesh(dashGeometry, dashMaterial);
-        dash.rotation.x = -Math.PI / 2;
-        dash.position.set(road, 0.024, z);
-        this.scene.add(dash);
+      for (let coordinate = -156; coordinate <= 156; coordinate += 12) {
+        dashTransform.rotation.set(-Math.PI / 2, 0, 0);
+        dashTransform.position.set(road, 0.024, coordinate);
+        dashTransform.updateMatrix();
+        verticalDashes.setMatrixAt(verticalIndex++, dashTransform.matrix);
+
+        dashTransform.position.set(coordinate, 0.024, road);
+        dashTransform.updateMatrix();
+        horizontalDashes.setMatrixAt(horizontalIndex++, dashTransform.matrix);
       }
     }
+    verticalDashes.instanceMatrix.needsUpdate = true;
+    horizontalDashes.instanceMatrix.needsUpdate = true;
+    this.scene.add(verticalDashes, horizontalDashes);
   }
 
   private createBuildings(): void {
