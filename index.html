@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="theme-color" content="#101a22" />
+    <meta name="description" content="Port Meridian — an original browser-based open-city driving and exploration game." />
+    <title>Port Meridian — Open City</title>
+  </head>
+  <body>
+    <div id="viewport" aria-label="3D game viewport"></div>
+
+    <main id="main-menu" class="screen">
+      <div class="menu-backdrop"></div>
+      <section class="menu-card">
+        <div class="eyebrow">OPEN CITY PROJECT <span>•</span> BUILD 0.1</div>
+        <div class="brand-mark"><span class="brand-square">PM</span><span>PORT <b>MERIDIAN</b></span></div>
+        <h1>Make the city<br /><em>your own.</em></h1>
+        <p class="intro">A free-roam city built for driving, exploration, deliveries and discovery.</p>
+        <div class="menu-actions">
+          <button id="start-new" class="button button-primary">Start new game <span>↗</span></button>
+          <button id="continue-game" class="button button-quiet">Continue journey</button>
+          <button id="menu-settings" class="button button-quiet">Settings</button>
+          <button id="show-credits" class="button button-quiet">Credits</button>
+        </div>
+        <div class="menu-foot"><span>ORIGINAL WORLD • PROCEDURAL CITY</span><span>WASD / MOUSE</span></div>
+      </section>
+      <div class="menu-side-note">A CITY WITH ROOM TO ROAM</div>
+    </main>
+
+    <section id="hud" class="hud hidden" aria-live="off">
+      <header class="hud-top">
+        <div class="hud-brand"><span class="mini-mark">PM</span><span>PORT MERIDIAN</span></div>
+        <div class="money-panel"><small>AVAILABLE FUNDS</small><strong id="money-value">$500</strong></div>
+      </header>
+
+      <section class="objective-card">
+        <div class="card-kicker"><span class="live-dot"></span> CURRENT OBJECTIVE</div>
+        <strong id="mission-title">Explore Port Meridian</strong>
+        <p id="mission-detail">Take a look around. The city is yours to discover.</p>
+        <div class="objective-progress"><span id="mission-state">FREE ROAM</span><span id="mission-reward"></span></div>
+      </section>
+
+      <div class="map-wrap">
+        <canvas id="minimap" width="180" height="180" aria-label="Minimap"></canvas>
+        <span class="map-label">NORTHSTAR DISTRICT</span>
+      </div>
+
+      <div class="status-panel">
+        <div class="status-label"><span>ENERGY</span><b id="energy-value">100%</b></div>
+        <div class="bar"><span id="energy-bar"></span></div>
+        <div id="vehicle-speed" class="vehicle-speed hidden">0 <small>KM/H</small></div>
+      </div>
+
+      <div id="interaction-prompt" class="interaction-prompt hidden"></div>
+      <div id="toast" class="toast hidden" role="status"></div>
+
+      <footer class="control-legend">
+        <span><kbd>W A S D</kbd> MOVE</span>
+        <span><kbd>SHIFT</kbd> RUN</span>
+        <span><kbd>SPACE</kbd> JUMP / HANDBRAKE</span>
+        <span><kbd>E</kbd> INTERACT</span>
+        <span><kbd>M</kbd> MAP</span>
+        <span><kbd>ESC</kbd> PAUSE</span>
+      </footer>
+    </section>
+
+    <section id="pause-screen" class="modal-screen hidden">
+      <div class="modal-card">
+        <div class="eyebrow">PORT MERIDIAN</div>
+        <h2>Paused</h2>
+        <p class="modal-subtitle">Your city is waiting.</p>
+        <button id="resume-game" class="button button-primary">Resume</button>
+        <button id="open-map" class="button button-quiet">Open city map</button>
+        <button id="pause-settings" class="button button-quiet">Settings</button>
+        <button id="save-game" class="button button-quiet">Save progress</button>
+        <button id="back-to-menu" class="button button-quiet">Main menu</button>
+      </div>
+    </section>
+
+    <section id="map-screen" class="modal-screen hidden">
+      <div class="modal-card map-card">
+        <div class="modal-heading">
+          <div><div class="eyebrow">NAVIGATION</div><h2>City map</h2></div>
+          <button id="close-map" class="icon-button" aria-label="Close map">×</button>
+        </div>
+        <canvas id="city-map" width="640" height="640"></canvas>
+        <div class="map-legend"><span><i class="legend-player"></i> YOU</span><span><i class="legend-mission"></i> OBJECTIVE</span><span><i class="legend-poi"></i> GARAGE / SHOP</span></div>
+        <p class="modal-hint">Map markers represent locations in the playable world.</p>
+      </div>
+    </section>
+
+    <section id="settings-screen" class="modal-screen hidden">
+      <div class="modal-card">
+        <div class="modal-heading">
+          <div><div class="eyebrow">PREFERENCES</div><h2>Settings</h2></div>
+          <button id="close-settings" class="icon-button" aria-label="Close settings">×</button>
+        </div>
+        <label class="setting-row"><span><b>Graphics quality</b><small>Lower settings reduce rendering load.</small></span>
+          <select id="quality-select"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select>
+        </label>
+        <label class="setting-row"><span><b>Sound volume</b><small>Interface and event sound effects.</small></span>
+          <input id="volume-select" type="range" min="0" max="100" value="65" />
+        </label>
+        <p class="modal-hint">Mouse look: click the 3D world to capture the pointer. Press Escape to release it and pause.</p>
+        <button id="settings-done" class="button button-primary">Done</button>
+      </div>
+    </section>
+
+    <section id="garage-screen" class="modal-screen hidden">
+      <div class="modal-card">
+        <div class="eyebrow">VEHICLE SERVICES</div>
+        <h2>Meridian Garage</h2>
+        <p class="modal-subtitle">Choose a vehicle to bring to the street.</p>
+        <div class="purchase-row"><div><b>City Compact</b><small>Balanced handling • Included</small></div><button id="spawn-compact" class="button button-primary">Spawn</button></div>
+        <div class="purchase-row"><div><b>Harbor Van</b><small>Steady handling • $450</small></div><button id="buy-van" class="button button-quiet">Buy / Spawn</button></div>
+        <button id="close-garage" class="button button-quiet">Close</button>
+      </div>
+    </section>
+
+    <section id="shop-screen" class="modal-screen hidden">
+      <div class="modal-card">
+        <div class="eyebrow">LOCAL MARKET</div>
+        <h2>Corner Market</h2>
+        <p class="modal-subtitle">A quick stop before the next drive.</p>
+        <div class="purchase-row"><div><b>Energy snack</b><small>Restores your running energy • $30</small></div><button id="buy-snack" class="button button-primary">Buy</button></div>
+        <button id="close-shop" class="button button-quiet">Close</button>
+      </div>
+    </section>
+
+    <section id="credits-screen" class="modal-screen hidden">
+      <div class="modal-card">
+        <div class="eyebrow">PROJECT NOTES</div>
+        <h2>Built from the ground up.</h2>
+        <p class="modal-subtitle">Port Meridian is an original, procedural browser game. Its city, landmarks and gameplay are independent creations.</p>
+        <p class="modal-hint">Three.js • TypeScript • Vite<br />No external game assets are required.</p>
+        <button id="close-credits" class="button button-primary">Back</button>
+      </div>
+    </section>
+
+    <div id="fatal-error" class="fatal-error hidden" role="alert">
+      <strong>Game could not start</strong>
+      <p id="fatal-message">Your browser may not support the required 3D graphics features.</p>
+      <button id="reload-game" class="button button-primary">Reload</button>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
