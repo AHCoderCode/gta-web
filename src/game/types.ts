@@ -5,6 +5,7 @@ export interface GameSave {
   savedAt: number;
   player: { x: number; z: number; yaw: number; stamina: number };
   vehicle: { x: number; z: number; yaw: number; kind: "compact" | "van" };
+  inVehicle?: boolean;
   money: number;
   completedMissions: string[];
   ownedVehicles: string[];

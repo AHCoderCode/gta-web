@@ -162,9 +162,12 @@ export class Game {
     this.ownedVehicles = new Set(data.ownedVehicles);
     this.quality = data.settings.quality;
     this.volume = data.settings.volume;
-    this.missions.restoreCompleted(data.completedMissions.includes("harbor-delivery"));
-    this.inVehicle = false;
-    this.player.setVisible(true);
+    this.missions.restoreProgress(
+      data.completedMissions.includes("harbor-delivery"),
+      data.completedMissions.includes("harbor-delivery-active")
+    );
+    this.inVehicle = data.inVehicle === true;
+    this.player.setVisible(!this.inVehicle);
     this.vehicle.group.visible = true;
     this.setQuality(this.quality);
     this.setVolume(this.volume);
@@ -226,6 +229,15 @@ export class Game {
 
   private interact(): void {
     if (this.inVehicle) {
+      const delivery = this.missions.interact(this.vehicle.group.position);
+      if (delivery.action === "completed") {
+        this.money += delivery.reward;
+        this.audio.playTone(780, 0.2);
+        this.ui.toast(`Delivery completed. You earned ${delivery.reward}.`);
+        this.save();
+        this.updateHUD();
+        return;
+      }
       this.inVehicle = false;
       const position = this.vehicle.group.position.clone();
       position.x += Math.cos(this.vehicle.yaw) * 2.2;
@@ -273,7 +285,12 @@ export class Game {
   }
 
   private promptText(): string {
-    if (this.inVehicle) return "E  •  Exit vehicle";
+    if (this.inVehicle) {
+      if (this.missions.canInteract(this.vehicle.group.position) && this.missions.status === "IN PROGRESS") {
+        return "E  •  Complete delivery";
+      }
+      return "E  •  Exit vehicle";
+    }
     if (this.player.position.distanceTo(this.vehicle.group.position) < 4.1) return "E  •  Enter vehicle";
     if (this.missions.canInteract(this.player.position)) {
       return this.missions.completed ? "" : "E  •  " + (this.missions.status === "AVAILABLE" ? "Accept delivery" : "Complete delivery");
@@ -323,8 +340,13 @@ export class Game {
         kind: this.vehicle.kind
       },
       money: this.money,
-      completedMissions: this.missions.completed ? ["harbor-delivery"] : [],
+      completedMissions: this.missions.completed
+        ? ["harbor-delivery"]
+        : this.missions.status === "IN PROGRESS"
+          ? ["harbor-delivery-active"]
+          : [],
       ownedVehicles: [...this.ownedVehicles],
+      inVehicle: this.inVehicle,
       settings: { quality: this.quality, volume: this.volume }
     };
     if (Persistence.save(data)) this.ui.toast("Progress saved on this device.");

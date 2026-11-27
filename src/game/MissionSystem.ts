@@ -92,10 +92,10 @@ export class MissionSystem {
     return this.state === "completed";
   }
 
-  restoreCompleted(completed: boolean): void {
-    this.state = completed ? "completed" : "available";
-    this.startMarker.visible = !completed;
-    this.destinationMarker.visible = false;
+  restoreProgress(completed: boolean, active: boolean): void {
+    this.state = completed ? "completed" : active ? "active" : "available";
+    this.startMarker.visible = this.state === "available";
+    this.destinationMarker.visible = this.state === "active";
   }
 
   reset(): void {
