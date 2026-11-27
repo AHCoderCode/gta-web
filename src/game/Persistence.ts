@@ -35,6 +35,7 @@ export class Persistence {
           yaw: finite(data.vehicle.yaw, 0, -1000, 1000),
           kind: data.vehicle.kind === "van" ? "van" : "compact"
         },
+        inVehicle: data.inVehicle === true,
         money: finite(data.money, 500, 0, 999999),
         completedMissions: Array.isArray(data.completedMissions)
           ? data.completedMissions.filter((item): item is string => typeof item === "string").slice(0, 100)
